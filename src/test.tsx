@@ -1,6 +1,6 @@
 import React from 'react'
 import Slack from '@slack/bolt'
-import { appHome } from './slack_react.tsx'
+import { appHome } from './main.ts'
 
 let increment: () => void = () => {}
 
