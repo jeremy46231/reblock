@@ -1,6 +1,6 @@
 import React from 'react'
 import Slack from '@slack/bolt'
-import { appHome } from './main.ts'
+import { appHome, message } from './main.ts'
 
 let increment: () => void = () => {}
 
@@ -35,14 +35,38 @@ await app.client.views.publish({
             <li>sub</li>
           </ol>
           <li>two</li>
-          <TestComponent />
-          <li>three</li>
         </ol>
       </rich>
-      cool ig
+      <section expand>
+        hi
+      </section>
+      <actions>
+        <button>hi</button>
+      </actions>
+    </>
+  ),
+})
+
+await app.client.chat.postMessage({
+  channel: 'C07FFUNMXUG',
+  blocks: message(
+    <>
+      <h1>Hello *World*</h1>
       <rich>
-        <TestComponent />
+        <ol>
+          <li>one</li>
+          <ol>
+            <li>sub</li>
+          </ol>
+          <li>two</li>
+        </ol>
       </rich>
+      <section expand>
+        hi
+      </section>
+      <actions>
+        <button>hi</button>
+      </actions>
     </>
   ),
 })

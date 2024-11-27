@@ -7,7 +7,6 @@ import type {
   StringIndexed,
 } from '@slack/bolt'
 
-export type Block = Slack.AnyBlock
 export type middlewareArguments<type extends string> = Parameters<
   Middleware<SlackEventMiddlewareArgs<type>, StringIndexed>
 >[0]
@@ -99,10 +98,10 @@ export function jsxToImageObject(jsx: Instance) {
   return {
     type: 'image' as const,
     ...source,
-    alt_text: String(jsx.props.alt),
+    alt_text: getTextProperty(jsx.props.alt, true),
     title:
       typeof jsx.props.title === 'string'
-        ? { type: 'plain_text', text: jsx.props.title }
+        ? { type: 'plain_text' as const, text: jsx.props.title }
         : undefined,
   }
 }
