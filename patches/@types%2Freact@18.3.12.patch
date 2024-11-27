@@ -1,0 +1,13 @@
+diff --git a/index.d.ts b/index.d.ts
+index b4072418d7d8175cfc71ec7ba5bd492061fbbad9..f3475aa2c863deb749097033d139f7b070d07113 100644
+--- a/index.d.ts
++++ b/index.d.ts
+@@ -4339,7 +4339,7 @@ declare global {
+         interface IntrinsicAttributes extends React.Attributes {}
+         interface IntrinsicClassAttributes<T> extends React.ClassAttributes<T> {}
+ 
+-        interface IntrinsicElements {
++        interface IntrinsicElements_DISABLED {
+             // HTML
+             a: React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
+             abbr: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
