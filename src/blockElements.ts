@@ -8,6 +8,7 @@ import {
   jsxToImageObject,
   plainDateToString,
 } from './helpers.ts'
+import { Temporal } from 'temporal-polyfill'
 
 type BlockElement =
   | Slack.SectionBlockAccessory
@@ -81,6 +82,21 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
     : undefined
 
   if (jsx.element === 'button') {
+    if (jsx.props.workflow) {
+      return {
+        type: 'workflow_button',
+        workflow: jsx.props.workflow as Slack.WorkflowButton['workflow'],
+        text: {
+          type: 'plain_text',
+          text: getTextChild(jsx),
+        },
+        style: jsx.props.primary
+          ? 'primary'
+          : jsx.props.danger
+          ? 'danger'
+          : undefined,
+      }
+    }
     return {
       type: 'button',
       text: {
@@ -97,11 +113,22 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       confirm,
     }
   }
-  if (jsx.element === 'checkboxlist') {
+  if (jsx.element === 'input') {
     return {
-      type: 'checkboxes',
-      ...jsxChildrenToOptions(jsx.children, 'checkbox'),
-      confirm,
+      type: 'plain_text_input',
+      initial_value: getTextProperty(jsx.props.initial),
+      multiline: !!jsx.props.multiline,
+      min_length: Number(jsx.props.minLength),
+      max_length: Number(jsx.props.maxLength),
+      placeholder,
+      focus_on_load,
+    }
+  }
+  if (jsx.element === 'textarea') {
+    return {
+      type: 'rich_text_input',
+      // TODO: initial_value
+      placeholder,
       focus_on_load,
     }
   }
@@ -123,12 +150,54 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       focus_on_load,
     }
   }
+  if (jsx.element === 'timepicker') {
+    assertNoChildren(jsx)
+    const timezoneRaw = jsx.props.timezone
+    let timezone = getTextProperty(timezoneRaw)
+    if (timezoneRaw instanceof Temporal.TimeZone) {
+      timezone = timezoneRaw.id
+    }
+    const initialRaw = jsx.props.initial
+    let initial_time = getTextProperty(initialRaw)
+    if (initialRaw instanceof Temporal.PlainTime) {
+      initial_time = initialRaw.toString()
+    }
+    return {
+      type: 'timepicker',
+      initial_time,
+      timezone,
+      confirm,
+      focus_on_load,
+      placeholder,
+    }
+  }
   if (jsx.element === 'email') {
     assertNoChildren(jsx)
     return {
       type: 'email_text_input',
       initial_value: getTextProperty(jsx.props.initial),
       placeholder,
+    }
+  }
+  if (jsx.element === 'urlinput') {
+    assertNoChildren(jsx)
+    return {
+      type: 'url_text_input',
+      initial_value: getTextProperty(jsx.props.initial),
+      placeholder,
+      focus_on_load,
+    }
+  }
+  if (jsx.element === 'number') {
+    assertNoChildren(jsx)
+    return {
+      type: 'number_input',
+      is_decimal_allowed: !!jsx.props.decimal,
+      initial_value: getTextProperty(jsx.props.initial),
+      min_value: getTextProperty(jsx.props.min),
+      max_value: getTextProperty(jsx.props.max),
+      placeholder,
+      focus_on_load,
     }
   }
   if (jsx.element === 'file') {
@@ -139,6 +208,24 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       max_files: Number(jsx.props.maxFiles ?? 10),
     }
   }
+
+  if (jsx.element === 'checkboxes') {
+    return {
+      type: 'checkboxes',
+      ...jsxChildrenToOptions(jsx.children, 'checkbox'),
+      confirm,
+      focus_on_load,
+    }
+  }
+  if (jsx.element === 'radio') {
+    return {
+      type: 'radio_buttons',
+      ...jsxChildrenToOptions(jsx.children, 'option'),
+      confirm,
+      focus_on_load,
+    }
+  }
+
   if (jsx.element === 'select') {
     const { options, selectedOptions } = jsxChildrenToOptions(
       jsx.children,
@@ -231,12 +318,11 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       focus_on_load,
     }
   }
-  if (jsx.element === 'number') {
-    assertNoChildren(jsx)
+  if (jsx.element === 'overflow') {
     return {
-      type: 'plain_text_input',
-      placeholder,
-      initial_value: getTextProperty(jsx.props.initial),
+      type: 'overflow',
+      options: jsxChildrenToOptions(jsx.children, 'option', true).options,
+      confirm,
     }
   }
 
@@ -246,5 +332,3 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
 
   throw new Error(`Unsupported block element: ${jsx.element}`)
 }
-
-jsxToBlockElement({} as any)

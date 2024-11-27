@@ -67,16 +67,6 @@ const ObjectReconciler = Reconciler({
     keepChildren,
     recyclableInstance
   ) => {
-    console.log('!!! cloneInstance', {
-      instance,
-      updatePayload,
-      type,
-      oldProps,
-      newProps,
-      internalInstanceHandle,
-      keepChildren,
-      recyclableInstance,
-    })
     return {
       type: 'instance',
       element: type,
