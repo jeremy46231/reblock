@@ -341,7 +341,10 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
   }
 
   if (jsx.element === 'img') {
-    return jsxToImageObject(jsx)
+    if (jsx.props.title) {
+      throw new Error('Title not allowed on image element, only image blocks allow titles')
+    }
+    return jsxToImageObject(jsx) satisfies Slack.ImageElement
   }
 
   throw new Error(`Unsupported block element: ${jsx.element}`)
@@ -371,6 +374,24 @@ export function blockElementIsSectionAccessory(
     'workflow_button',
   ].includes(element.type)
 }
+/** The JSX tag names which correspond to block elements an input block allows */
+export const inputBlockElementTagNames = [
+  'text',
+  'textarea',
+  'datepicker',
+  'datetimepicker',
+  'timepicker',
+  'email',
+  'url',
+  'number',
+  'file',
+  'checkboxes',
+  'radio',
+  'select',
+  'selectuser',
+  'selectconversation',
+  'selectchannel',
+]
 export function blockElementIsInputBlockElement(
   element: BlockElement
 ): element is Slack.InputBlockElement {

@@ -2,15 +2,18 @@ import React from 'react'
 import Reconciler from 'react-reconciler'
 import { DefaultEventPriority } from 'react-reconciler/constants'
 
-type Props = Record<string, unknown>
-export type Root = {
-  type: 'root'
-  children: Array<Instance | TextInstance>
+export abstract class Root {
+  children?: Rendered
+  abstract finalize(): void
 }
+
+export type Rendered = (Instance | TextInstance)[]
+
+type Props = Record<string, unknown>
 export type Instance = {
   type: 'instance'
   element: string
-  children: Array<Instance | TextInstance>
+  children: (Instance | TextInstance)[]
   text: string | null
   props: Props
 }
@@ -85,36 +88,34 @@ const ObjectReconciler = Reconciler({
     throw new Error('Unsupported')
   },
   detachDeletedInstance: () => {},
-  createContainerChildSet: (_container: Root) =>
-    [] as (Instance | TextInstance)[],
+  createContainerChildSet: (_container: Root) => {
+    return [] as (Instance | TextInstance)[]
+  },
   appendChildToContainerChildSet: (childSet, child) => {
     childSet.push(child)
   },
   finalizeContainerChildren: (container, newChildren) => {
     container.children = newChildren
+    container.finalize()
   },
   replaceContainerChildren: (container, newChildren) => {
     container.children = newChildren
   },
 })
 
-export const ObjectRenderer = {
-  render(element: React.ReactNode) {
-    const root: Root = {
-      type: 'root',
-      children: [],
-    }
-    const container = ObjectReconciler.createContainer(
-      root,
-      0,
-      null,
-      true,
-      false,
-      '',
-      console.warn,
-      null
-    )
-    ObjectReconciler.updateContainer(element, container, null)
-    return root
-  },
+export function createContainer(root: Root) {
+  const container: unknown = ObjectReconciler.createContainer(
+    root,
+    0,
+    null,
+    true,
+    false,
+    '',
+    console.warn,
+    null
+  )
+  return container
+}
+export function render(element: React.ReactNode, container: unknown) {
+  ObjectReconciler.updateContainer(element, container, null)
 }

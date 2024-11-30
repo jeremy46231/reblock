@@ -7,9 +7,8 @@ import type {
   StringIndexed,
 } from '@slack/bolt'
 
-export type middlewareArguments<type extends string> = Parameters<
-  Middleware<SlackEventMiddlewareArgs<type>, StringIndexed>
->[0]
+// magic Omit that works with union types, thanks o1
+export type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never
 
 export function assertNoChildren(element: Instance) {
   if (element.children.length > 0) {

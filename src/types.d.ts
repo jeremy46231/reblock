@@ -2,7 +2,7 @@ import type { Temporal } from 'temporal-polyfill'
 import type React from 'react'
 import type { types as Slack } from '@slack/bolt'
 
-type NoChildren = Record<string, never>
+type NoChildren = { children?: never }
 type AllowsChildren = { children?: React.ReactNode }
 
 declare global {
@@ -59,21 +59,29 @@ declare global {
         maxLength?: number
         placeholder?: string
         focus?: boolean
+        label?: string
+        hint?: string
       } & AllowsChildren
       textarea: {
         placeholder?: string
         focus?: boolean
+        label?: string
+        hint?: string
       } & AllowsChildren
       datepicker: {
         initial?: string | Temporal.PlainDate | Date
         confirm?: Slack.ConfirmationDialog
         placeholder?: string
         focus?: boolean
+        label?: string
+        hint?: string
       } & NoChildren
       datetimepicker: {
         initial?: string | Temporal.Instant | Date
         confirm?: Slack.ConfirmationDialog
         focus?: boolean
+        label?: string
+        hint?: string
       } & NoChildren
       timepicker: {
         initial?: string | Temporal.PlainTime
@@ -81,15 +89,21 @@ declare global {
         confirm?: Slack.ConfirmationDialog
         placeholder?: string
         focus?: boolean
+        label?: string
+        hint?: string
       } & NoChildren
       email: {
         initial?: string
         placeholder?: string
+        label?: string
+        hint?: string
       } & NoChildren
       url: {
         initial?: string
         placeholder?: string
         focus?: boolean
+        label?: string
+        hint?: string
       } & NoChildren
       number: {
         decimal?: boolean
@@ -98,14 +112,20 @@ declare global {
         max?: number
         placeholder?: string
         focus?: boolean
+        label?: string
+        hint?: string
       } & NoChildren
       file: {
         filetypes?: string[]
         maxFiles?: number
+        label?: string
+        hint?: string
       } & NoChildren
       checkboxes: {
         confirm?: Slack.ConfirmationDialog
         focus?: boolean
+        label?: string
+        hint?: string
       } & AllowsChildren
       checkbox: {
         mrkdwn?: boolean
@@ -113,6 +133,8 @@ declare global {
       radio: {
         confirm?: Slack.ConfirmationDialog
         focus?: boolean
+        label?: string
+        hint?: string
       } & AllowsChildren
       option: {
         mrkdwn?: boolean
@@ -127,6 +149,8 @@ declare global {
         placeholder?: string
         confirm?: Slack.ConfirmationDialog
         focus?: boolean
+        label?: string
+        hint?: string
       } & AllowsChildren
       selectuser: (
         | {
@@ -141,6 +165,8 @@ declare global {
         confirm?: Slack.ConfirmationDialog
         placeholder?: string
         focus?: boolean
+        label?: string
+        hint?: string
       } & NoChildren
       selectconversation: (
         | {
@@ -158,6 +184,8 @@ declare global {
         confirm?: Slack.ConfirmationDialog
         placeholder?: string
         focus?: boolean
+        label?: string
+        hint?: string
       } & NoChildren
       selectchannel: (
         | {
@@ -173,6 +201,8 @@ declare global {
         confirm?: Slack.ConfirmationDialog
         placeholder?: string
         focus?: boolean
+        label?: string
+        hint?: string
       } & NoChildren
       overflow: {
         confirm?: Slack.ConfirmationDialog

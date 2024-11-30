@@ -5,7 +5,7 @@ import {
   getTextProperty,
   jsxToImageObject,
 } from './helpers.ts'
-import type { Root } from './renderer.ts'
+import type { Rendered } from './renderer.ts'
 import type { types as Slack } from '@slack/bolt'
 import {
   type BlockElement,
@@ -13,11 +13,12 @@ import {
   blockElementIsContextBlockElement,
   blockElementIsInputBlockElement,
   blockElementIsSectionAccessory,
+  inputBlockElementTagNames,
   jsxToBlockElement,
 } from './blockElements.ts'
 
-export function jsxToBlocks(jsx: Root): Slack.KnownBlock[] {
-  return jsx.children.map<Slack.KnownBlock>((child) => {
+export function jsxToBlocks(jsx: Rendered): Slack.KnownBlock[] {
+  return jsx.map<Slack.KnownBlock>((child) => {
     if (child.type === 'text') {
       return {
         type: 'section',
@@ -97,22 +98,19 @@ export function jsxToBlocks(jsx: Root): Slack.KnownBlock[] {
           }
           block.fields.push({
             type: el.props.mrkdwn ? 'mrkdwn' : 'plain_text',
-            text: el.children.map((el) => el.text).join(''),
+            text: getTextChild(el),
           })
           continue
         }
-        if (el.element === 'accessory') {
-          if (block.accessory) {
-            throw new Error('Section may only have one accessory')
-          }
-          const accessory = jsxToBlockElement(el)
-          if (!blockElementIsSectionAccessory(accessory)) {
-            throw new Error(`Unsupported accessory type: ${accessory.type}`)
-          }
-          block.accessory = accessory
-          continue
+        // it must be an accessory
+        if (block.accessory) {
+          throw new Error('Section may only have one accessory')
         }
-        throw new Error(`Unsupported section child: ${el.element}`)
+        const accessory = jsxToBlockElement(el)
+        if (!blockElementIsSectionAccessory(accessory)) {
+          throw new Error(`Unsupported accessory type: ${accessory.type}`)
+        }
+        block.accessory = accessory
       }
       return block satisfies Slack.SectionBlock
     }
@@ -128,29 +126,25 @@ export function jsxToBlocks(jsx: Root): Slack.KnownBlock[] {
         }),
       } satisfies Slack.ContextBlock
     }
-    if (child.element === 'input') {
-      if (child.children.length !== 1 || child.children[0].type !== 'instance') {
-        throw new Error('Input must contain one element')
+    if (inputBlockElementTagNames.includes(child.element)) {
+      const element = jsxToBlockElement(child)
+      if (blockElementIsInputBlockElement(element)) {
+        return {
+          type: 'input',
+          element,
+          label: {
+            type: 'plain_text',
+            text: getTextProperty(child.props.label, true),
+          },
+          hint: child.props.hint
+            ? {
+                type: 'plain_text',
+                text: getTextProperty(child.props.hint, true),
+              }
+            : undefined,
+          optional: !!child.props.optional,
+        } satisfies Slack.InputBlock
       }
-      const element = jsxToBlockElement(child.children[0])
-      if (!blockElementIsInputBlockElement(element)) {
-        throw new Error(`Unsupported element type: ${element.type}`)
-      }
-      return {
-        type: 'input',
-        element,
-        label: {
-          type: 'plain_text',
-          text: getTextProperty(child.props.label, true),
-        },
-        hint: child.props.hint
-          ? {
-              type: 'plain_text',
-              text: getTextProperty(child.props.hint, true),
-            }
-          : undefined,
-        optional: !!child.props.optional,
-      } satisfies Slack.InputBlock
     }
     if (child.element === 'actions') {
       return {
