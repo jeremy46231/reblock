@@ -100,6 +100,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
         text: getTextProperty(jsx.props.placeholder, true),
       }
     : undefined
+  const action_id = `reblock_${jsx.id}`
 
   if (jsx.element === 'button') {
     if (jsx.props.workflow) {
@@ -133,6 +134,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
         : undefined,
       accessibility_label: getTextProperty(jsx.props.alt),
       confirm,
+      action_id,
     } satisfies Slack.Button
   }
   if (jsx.element === 'text') {
@@ -144,6 +146,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       max_length: jsx.props.maxLength ? Number(jsx.props.maxLength) : undefined,
       placeholder,
       focus_on_load,
+      action_id,
     } satisfies Slack.PlainTextInput
   }
   if (jsx.element === 'textarea') {
@@ -152,6 +155,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       // TODO: initial_value
       placeholder,
       focus_on_load,
+      action_id,
     } satisfies Slack.RichTextInput
   }
   if (jsx.element === 'datepicker') {
@@ -162,6 +166,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       confirm,
       placeholder,
       focus_on_load,
+      action_id,
     } satisfies Slack.Datepicker
   }
   if (jsx.element === 'datetimepicker') {
@@ -171,6 +176,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       initial_date_time: dateToSlackTimestamp(jsx.props.initial),
       confirm,
       focus_on_load,
+      action_id,
     } satisfies Slack.DateTimepicker
   }
   if (jsx.element === 'timepicker') {
@@ -192,6 +198,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       confirm,
       placeholder,
       focus_on_load,
+      action_id,
     } satisfies Slack.Timepicker
   }
   if (jsx.element === 'email') {
@@ -200,6 +207,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       type: 'email_text_input',
       initial_value: getTextProperty(jsx.props.initial),
       placeholder,
+      action_id,
     } satisfies Slack.EmailInput
   }
   if (jsx.element === 'url') {
@@ -209,6 +217,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       initial_value: getTextProperty(jsx.props.initial),
       placeholder,
       focus_on_load,
+      action_id,
     } satisfies Slack.URLInput
   }
   if (jsx.element === 'number') {
@@ -230,6 +239,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       max_value: numberString(jsx.props.max),
       placeholder,
       focus_on_load,
+      action_id,
     } satisfies Slack.NumberInput
   }
   if (jsx.element === 'file') {
@@ -238,6 +248,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       type: 'file_input',
       filetypes: jsx.props.filetypes as string[] | undefined,
       max_files: Number(jsx.props.maxFiles ?? 10),
+      action_id,
     } satisfies Slack.FileInput
   }
 
@@ -247,6 +258,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       ...jsxChildrenToOptions(jsx.children, 'checkbox'),
       confirm,
       focus_on_load,
+      action_id,
     } satisfies Slack.Checkboxes
   }
   if (jsx.element === 'radio') {
@@ -255,6 +267,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       ...jsxChildrenToOptions(jsx.children, 'option'),
       confirm,
       focus_on_load,
+      action_id,
     } satisfies Slack.RadioButtons
   }
 
@@ -266,6 +279,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       placeholder,
       confirm,
       focus_on_load,
+      action_id,
     } satisfies Slack.StaticSelect | Slack.MultiStaticSelect
   }
   if (jsx.element === 'selectuser') {
@@ -278,6 +292,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
         placeholder,
         confirm,
         focus_on_load,
+        action_id,
       } satisfies Slack.MultiUsersSelect
     }
     return {
@@ -286,6 +301,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       placeholder,
       confirm,
       focus_on_load,
+      action_id,
     } satisfies Slack.UsersSelect
   }
   if (jsx.element === 'selectconversation') {
@@ -300,6 +316,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
         placeholder,
         confirm,
         focus_on_load,
+        action_id,
       } satisfies Slack.MultiConversationsSelect
     }
     return {
@@ -310,6 +327,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       placeholder,
       confirm,
       focus_on_load,
+      action_id,
     } satisfies Slack.ConversationsSelect
   }
   if (jsx.element === 'selectchannel') {
@@ -322,6 +340,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
         placeholder,
         confirm,
         focus_on_load,
+        action_id,
       } satisfies Slack.MultiChannelsSelect
     }
     return {
@@ -330,6 +349,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       placeholder,
       confirm,
       focus_on_load,
+      action_id,
     }
   }
   if (jsx.element === 'overflow') {
@@ -337,6 +357,7 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       type: 'overflow',
       options: jsxChildrenToOptions(jsx.children, 'option', true).options,
       confirm,
+      action_id,
     }
   }
 

@@ -1,10 +1,76 @@
+import { nanoid } from 'nanoid'
 import React from 'react'
 import Reconciler from 'react-reconciler'
 import { DefaultEventPriority } from 'react-reconciler/constants'
+import type Slack from '@slack/bolt'
+import type { types as SlackTypes, webApi as SlackAPITypes } from '@slack/bolt'
 
+type handler = (event: Slack.BlockAction, client: SlackAPITypes.WebClient) => void
 export abstract class Root {
   children?: Rendered
-  abstract finalize(): void
+  getChildren(): Rendered {
+    if (!this.children) {
+      throw new Error('No children')
+    }
+    function removeHidden(children: Rendered): Rendered {
+      return children.flatMap((child): Rendered => {
+        if (child.hidden) {
+          return []
+        }
+        if (child.type === 'instance') {
+          return [
+            {
+              ...child,
+              children: removeHidden(child.children),
+            },
+          ]
+        }
+        return [child]
+      })
+    }
+    return removeHidden(this.children)
+  }
+
+  abstract publish(): void
+  rendering = true
+
+  timeoutID?: NodeJS.Timeout
+  objectTreeModified() {
+    if (!this.rendering) {
+      return
+    }
+    if (this.timeoutID) {
+      clearTimeout(this.timeoutID)
+    }
+    this.timeoutID = setTimeout(() => {
+      this.findEventHandlers()
+      this.publish()
+    }, 50)
+  }
+
+  eventHandlers = new Map<string, handler>()
+  findEventHandlers() {
+    this.eventHandlers.clear()
+    const traverseFindHandlers = (children: Rendered) => {
+      for (const child of children) {
+        if (child.type === 'instance') {
+          if (child.props.onEvent) {
+            const handler = child.props.onEvent as handler
+            this.eventHandlers.set(child.id, handler)
+          }
+          traverseFindHandlers(child.children)
+        }
+      }
+    }
+    traverseFindHandlers(this.getChildren())
+  }
+
+  stopRendering() {
+    this.rendering = false
+    if (this.timeoutID) {
+      clearTimeout(this.timeoutID)
+    }
+  }
 }
 
 export type Rendered = (Instance | TextInstance)[]
@@ -12,99 +78,210 @@ export type Rendered = (Instance | TextInstance)[]
 type Props = Record<string, unknown>
 export type Instance = {
   type: 'instance'
+  id: string
+  hidden: boolean
   element: string
-  children: (Instance | TextInstance)[]
+  children: Rendered
   text: string | null
   props: Props
 }
 export type TextInstance = {
   type: 'text'
+  id: string
+  hidden: boolean
   text: string
 }
 
-const ObjectReconciler = Reconciler({
-  supportsPersistence: true,
-  supportsMutation: false,
-  supportsHydration: false,
-  getRootHostContext: () => null,
-  getChildHostContext: () => null,
-  createInstance: (type: string, props: Props): Instance => {
-    return {
-      type: 'instance',
-      element: type,
-      children: [],
-      text: null,
-      props: props,
-    }
-  },
-  appendInitialChild: (parent: Instance, child: Instance | TextInstance) => {
-    parent.children.push(child)
-  },
-  createTextInstance: (text): TextInstance => {
-    return {
-      type: 'text',
-      text,
-    }
-  },
-  finalizeInitialChildren: () => false,
-  prepareUpdate: () => null,
-  shouldSetTextContent: () => false,
-  getPublicInstance: (instance) => instance,
-  prepareForCommit: () => null,
-  resetAfterCommit: () => null,
-  preparePortalMount: () => null,
-  scheduleTimeout: setTimeout,
-  cancelTimeout: clearTimeout,
-  noTimeout: -1 as const,
-  isPrimaryRenderer: true,
-  getCurrentEventPriority() {
-    return DefaultEventPriority
-  },
-  cloneInstance: (
-    instance,
-    updatePayload,
-    type,
-    oldProps,
-    newProps,
-    internalInstanceHandle,
-    keepChildren,
-    recyclableInstance
-  ) => {
-    return {
-      type: 'instance',
-      element: type,
-      children: keepChildren ? instance.children : [],
-      text: null,
-      props: newProps,
-    } satisfies Instance
-  },
-  getInstanceFromNode: () => {
-    throw new Error('Unsupported')
-  },
-  beforeActiveInstanceBlur: () => {},
-  afterActiveInstanceBlur: () => {},
-  prepareScopeUpdate: () => {},
-  getInstanceFromScope: () => {
-    throw new Error('Unsupported')
-  },
-  detachDeletedInstance: () => {},
-  createContainerChildSet: (_container: Root) => {
-    return [] as (Instance | TextInstance)[]
-  },
-  appendChildToContainerChildSet: (childSet, child) => {
-    childSet.push(child)
-  },
-  finalizeContainerChildren: (container, newChildren) => {
-    container.children = newChildren
-    container.finalize()
-  },
-  replaceContainerChildren: (container, newChildren) => {
-    container.children = newChildren
-  },
-})
+/** no-op to help with type inference, probably a better way to do this but ¯\_(ツ)_/¯ */
+function hostConfigTypeHelper<a, b, c, d, e, f, g, h, i, j, k, l, m>(
+  config: Reconciler.HostConfig<a, b, c, d, e, f, g, h, i, j, k, l, m>
+) {
+  return config
+}
+
+const makeHostConfig = (root: Root) =>
+  hostConfigTypeHelper({
+    supportsPersistence: true,
+    supportsMutation: true,
+    supportsHydration: false,
+    getRootHostContext: () => null,
+    getChildHostContext: () => null,
+    createInstance: (type: string, props: Props): Instance => {
+      return {
+        type: 'instance',
+        id: nanoid(),
+        hidden: false,
+        element: type,
+        children: [],
+        text: null,
+        props: props,
+      }
+    },
+    appendInitialChild: (parent: Instance, child: Instance | TextInstance) => {
+      parent.children.push(child)
+      root.objectTreeModified()
+    },
+    createTextInstance: (text): TextInstance => {
+      return {
+        type: 'text',
+        id: nanoid(),
+        hidden: false,
+        text,
+      }
+    },
+    finalizeInitialChildren: () => {
+      root.objectTreeModified()
+      return false
+    },
+    shouldSetTextContent: () => false,
+    getPublicInstance: (instance) => instance,
+    prepareForCommit: () => null,
+    resetAfterCommit: () => null,
+    preparePortalMount: () => null,
+    scheduleTimeout: setTimeout,
+    cancelTimeout: clearTimeout,
+    noTimeout: -1 as const,
+    isPrimaryRenderer: true,
+    getCurrentEventPriority() {
+      return DefaultEventPriority
+    },
+    cloneInstance: (
+      instance,
+      updatePayload,
+      type,
+      oldProps,
+      newProps,
+      internalInstanceHandle,
+      keepChildren,
+      recyclableInstance
+    ) => {
+      return {
+        type: 'instance',
+        id: nanoid(),
+        hidden: instance.hidden,
+        element: type,
+        children: keepChildren ? instance.children : [],
+        text: null,
+        props: newProps,
+      } satisfies Instance
+    },
+    getInstanceFromNode: () => {
+      throw new Error('Unsupported')
+    },
+    beforeActiveInstanceBlur: () => {},
+    afterActiveInstanceBlur: () => {},
+    prepareScopeUpdate: () => {},
+    getInstanceFromScope: () => {
+      throw new Error('Unsupported')
+    },
+    detachDeletedInstance: () => {},
+    createContainerChildSet: (_container: Root) => {
+      return [] as (Instance | TextInstance)[]
+    },
+    appendChildToContainerChildSet: (childSet, child) => {
+      childSet.push(child)
+      root.objectTreeModified()
+    },
+    finalizeContainerChildren: (container, newChildren) => {
+      container.children = newChildren
+      root.objectTreeModified()
+    },
+    replaceContainerChildren: (container, newChildren) => {
+      container.children = newChildren
+      root.objectTreeModified()
+    },
+
+    appendChild(parentInstance, child) {
+      parentInstance.children.push(child)
+      root.objectTreeModified()
+    },
+    appendChildToContainer(container, child) {
+      if (!container.children) {
+        container.children = []
+      }
+      container.children.push(child)
+      root.objectTreeModified()
+    },
+    insertBefore(parentInstance, child, beforeChild: Instance | TextInstance) {
+      const index = parentInstance.children.indexOf(beforeChild)
+      parentInstance.children.splice(index, 0, child)
+      root.objectTreeModified()
+    },
+    insertInContainerBefore(
+      container,
+      child,
+      beforeChild: Instance | TextInstance
+    ) {
+      if (!container.children) {
+        container.children = []
+      }
+      const index = container.children.indexOf(beforeChild)
+      container.children.splice(index, 0, child)
+      root.objectTreeModified()
+    },
+    removeChild(parentInstance, child) {
+      const index = parentInstance.children.indexOf(child)
+      parentInstance.children.splice(index, 1)
+      root.objectTreeModified()
+    },
+    removeChildFromContainer(container, child) {
+      if (!container.children) {
+        container.children = []
+      }
+      const index = container.children.indexOf(child)
+      container.children.splice(index, 1)
+      root.objectTreeModified()
+    },
+    resetTextContent(instance) {
+      instance.text = ''
+      root.objectTreeModified()
+    },
+    commitTextUpdate(textInstance, prevText, nextText) {
+      textInstance.text = nextText
+      root.objectTreeModified()
+    },
+    commitMount(instance, type, props, internalHandle) {},
+    prepareUpdate: () => {
+      return {}
+    },
+    commitUpdate(instance, updatePayload, type, prevProps, nextProps) {
+      instance.props = nextProps
+      root.objectTreeModified()
+    },
+    hideInstance(instance) {
+      instance.hidden = true
+      root.objectTreeModified()
+    },
+    hideTextInstance(textInstance) {
+      textInstance.hidden = true
+      root.objectTreeModified()
+    },
+    unhideInstance(instance) {
+      instance.hidden = false
+      root.objectTreeModified()
+    },
+    unhideTextInstance(textInstance) {
+      textInstance.hidden = false
+      root.objectTreeModified()
+    },
+    clearContainer(container) {
+      container.children = []
+      root.objectTreeModified()
+    },
+  })
+
+type reconciler = Reconciler.Reconciler<
+  Root,
+  Instance,
+  TextInstance,
+  Instance | TextInstance,
+  Instance | TextInstance
+>
 
 export function createContainer(root: Root) {
-  const container: unknown = ObjectReconciler.createContainer(
+  const hostConfig = makeHostConfig(root)
+  const reconciler = Reconciler(hostConfig) satisfies reconciler
+  const container: unknown = reconciler.createContainer(
     root,
     0,
     null,
@@ -114,8 +291,15 @@ export function createContainer(root: Root) {
     console.warn,
     null
   )
-  return container
+  return { container, reconciler }
 }
-export function render(element: React.ReactNode, container: unknown) {
-  ObjectReconciler.updateContainer(element, container, null)
+export function render(
+  element: React.ReactNode,
+  reactInstance: { container: unknown; reconciler: reconciler }
+) {
+  reactInstance.reconciler.updateContainer(
+    element,
+    reactInstance.container,
+    null
+  )
 }
