@@ -8,6 +8,67 @@ import {
   getTextChild,
 } from '../helpers.ts'
 
+export const richTextElementTagNames = [
+  'rich',
+  'codeblock',
+  'blockquote',
+  'ul',
+  'ol',
+]
+
+export function jsxToRichTextBlock(
+  jsx: Instance | TextInstance
+): Slack.RichTextBlock {
+  if (jsx.type === 'text') {
+    throw new Error('Text nodes not allowed in rich text')
+  }
+  if (jsx.element === 'rich') {
+    return {
+      type: 'rich_text',
+      elements: [
+        {
+          type: 'rich_text_section',
+          elements: jsx.children.flatMap((el) => jsxToRichTextElements(el)),
+        },
+      ],
+    }
+  }
+  if (jsx.element === 'codeblock') {
+    const elements = jsx.children.flatMap((el) => jsxToRichTextElements(el))
+    if (!assertElementsAllowedInCodeBlock(elements)) {
+      throw new Error('Code block contains invalid elements')
+    }
+    return {
+      type: 'rich_text',
+      elements: [
+        {
+          type: 'rich_text_preformatted',
+          elements: elements,
+        },
+      ],
+    }
+  }
+  if (jsx.element === 'blockquote') {
+    return {
+      type: 'rich_text',
+      elements: [
+        {
+          type: 'rich_text_quote',
+          elements: jsx.children.flatMap((el) => jsxToRichTextElements(el)),
+        },
+      ],
+    }
+  }
+  if (jsx.element === 'ul' || jsx.element === 'ol') {
+    return {
+      type: 'rich_text',
+      elements: jsxToList(jsx),
+    }
+  }
+
+  throw new Error(`(should be impossible) Unsupported element type: ${jsx.element}`)
+}
+
 function assertElementsAllowedInCodeBlock(
   elements: Slack.RichTextElement[]
 ): elements is (Slack.RichTextText | Slack.RichTextLink)[] {
@@ -17,46 +78,6 @@ function assertElementsAllowedInCodeBlock(
     }
   }
   return true
-}
-
-export function jsxToRichTextPart(
-  jsx: Instance | TextInstance
-): Slack.RichTextBlockElement[] {
-  if (jsx.type === 'text') {
-    throw new Error('Text nodes not allowed in rich text')
-  }
-  if (jsx.element === 'section') {
-    return [
-      {
-        type: 'rich_text_section',
-        elements: jsx.children.flatMap((el) => jsxToRichTextElements(el)),
-      },
-    ]
-  }
-  if (jsx.element === 'codeblock') {
-    const elements = jsx.children.flatMap((el) => jsxToRichTextElements(el))
-    if (!assertElementsAllowedInCodeBlock(elements))
-      throw new Error('Assertion failed')
-    return [
-      {
-        type: 'rich_text_preformatted',
-        elements: elements,
-      },
-    ]
-  }
-  if (jsx.element === 'blockquote') {
-    return [
-      {
-        type: 'rich_text_quote',
-        elements: jsx.children.flatMap((el) => jsxToRichTextElements(el)),
-      },
-    ]
-  }
-  if (jsx.element === 'ul' || jsx.element === 'ol') {
-    return jsxToList(jsx)
-  }
-
-  throw new Error(`Unsupported element type: ${jsx.type} ${jsx.element}`)
 }
 
 export function jsxToList(

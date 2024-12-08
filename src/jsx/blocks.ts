@@ -1,4 +1,4 @@
-import { jsxToRichTextPart } from './richText.ts'
+import { jsxToRichTextBlock, richTextElementTagNames } from './richText.ts'
 import {
   assertNoChildren,
   getTextChild,
@@ -8,6 +8,7 @@ import {
 import type { Rendered } from '../renderer.ts'
 import type { types as Slack } from '@slack/bolt'
 import {
+  actionsBlockElementTagNames,
   type BlockElement,
   blockElementIsActionsBlockElement,
   blockElementIsContextBlockElement,
@@ -23,15 +24,7 @@ export function jsxToBlocks(
   let text = ''
   const blocks = jsx.flatMap<Slack.KnownBlock>((child) => {
     if (child.type === 'text') {
-      return [
-        {
-          type: 'section',
-          text: {
-            type: 'plain_text',
-            text: child.text,
-          },
-        },
-      ] satisfies [Slack.SectionBlock]
+      throw new Error('Text nodes are not allowed at the root, put them in a <section> or <rich> element')
     }
     if (child.element === 'messagetext') {
       text = getTextChild(child)
@@ -56,14 +49,6 @@ export function jsxToBlocks(
           },
         },
       ] satisfies [Slack.HeaderBlock]
-    }
-    if (child.element === 'rich') {
-      return [
-        {
-          type: 'rich_text',
-          elements: child.children.flatMap((el) => jsxToRichTextPart(el)),
-        },
-      ] satisfies [Slack.RichTextBlock]
     }
     if (child.element === 'img') {
       return [jsxToImageObject(child)] satisfies [Slack.ImageBlock]
@@ -145,6 +130,21 @@ export function jsxToBlocks(
         },
       ] satisfies [Slack.ContextBlock]
     }
+    if (child.element === 'actions') {
+      return [
+        {
+          type: 'actions',
+          elements: child.children.map((el) => {
+            const element = jsxToBlockElement(el)
+            if (!blockElementIsActionsBlockElement(element)) {
+              throw new Error(`Unsupported element type: ${element.type}`)
+            }
+            return element
+          }),
+        },
+      ] satisfies [Slack.ActionsBlock]
+    }
+
     if (inputBlockElementTagNames.includes(child.element)) {
       const element = jsxToBlockElement(child)
       if (blockElementIsInputBlockElement(element)) {
@@ -167,21 +167,21 @@ export function jsxToBlocks(
         ] satisfies [Slack.InputBlock]
       }
     }
-    if (child.element === 'actions') {
-      return [
-        {
-          type: 'actions',
-          elements: child.children.map((el) => {
-            const element = jsxToBlockElement(el)
-            if (!blockElementIsActionsBlockElement(element)) {
-              throw new Error(`Unsupported element type: ${element.type}`)
-            }
-            return element
-          }),
-        },
-      ] satisfies [Slack.ActionsBlock]
+    if (richTextElementTagNames.includes(child.element)) {
+      return [jsxToRichTextBlock(child)] satisfies [Slack.RichTextBlock]
     }
-
+    if (actionsBlockElementTagNames.includes(child.element)) {
+      const element = jsxToBlockElement(child)
+      if (blockElementIsActionsBlockElement(element)) {
+        return [
+          {
+            type: 'actions',
+            elements: [element],
+          },
+        ] satisfies [Slack.ActionsBlock]
+      }
+    }
+    
     throw new Error(`Unsupported element type: ${child.type} ${child.element}`)
   })
   return [blocks, text]

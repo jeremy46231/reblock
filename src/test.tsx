@@ -18,19 +18,15 @@ function Increment() {
   return (
     <>
       <rich>
-        <section>
-          Count: <code>{count}</code>
-        </section>
+        Count: <code>{count}</code>
       </rich>
-      <actions>
-        <button
-          onEvent={(event) => {
-            setCount((count) => count + 1)
-          }}
-        >
-          Increment
-        </button>
-      </actions>
+      <button
+        onEvent={() => {
+          setCount((count) => count + 1)
+        }}
+      >
+        Increment
+      </button>
     </>
   )
 }
@@ -46,13 +42,11 @@ await app.start()
 Reblock.appHome(app, (userID) => (
   <>
     <rich>
-      <section>
-        Hello <user>{userID}</user>! The timer is at{' '}
-        <code>
-          <Counter />
-        </code>
-        .
-      </section>
+      Hello <user>{userID}</user>! The timer is at{' '}
+      <code>
+        <Counter />
+      </code>
+      .
     </rich>
     <Increment />
   </>

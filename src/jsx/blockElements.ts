@@ -442,6 +442,23 @@ export function blockElementIsInputBlockElement(
     'url_text_input',
   ].includes(element.type)
 }
+
+/** The JSX tag names which correspond to block elements an actions block allows */
+export const actionsBlockElementTagNames = [
+  'button',
+  'checkboxes',
+  'datepicker',
+  'datetimepicker',
+  'timepicker',
+  'select',
+  'selectuser',
+  'selectconversation',
+  'selectchannel',
+  'overflow',
+  'radio',
+  'textarea',
+]
+
 export function blockElementIsActionsBlockElement(
   element: BlockElement
 ): element is Slack.ActionsBlockElement {
