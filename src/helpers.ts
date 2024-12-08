@@ -8,7 +8,9 @@ import type {
 } from '@slack/bolt'
 
 // magic Omit that works with union types, thanks o1
-export type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never
+export type DistributiveOmit<T, K extends keyof any> = T extends any
+  ? Omit<T, K>
+  : never
 
 export function assertNoChildren(element: Instance) {
   if (element.children.length > 0) {

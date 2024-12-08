@@ -3,9 +3,11 @@ import React from 'react'
 import Reconciler from 'react-reconciler'
 import { DefaultEventPriority } from 'react-reconciler/constants'
 import type Slack from '@slack/bolt'
-import type { types as SlackTypes, webApi as SlackAPITypes } from '@slack/bolt'
 
-type handler = (event: Slack.BlockAction, client: SlackAPITypes.WebClient) => void
+type handler = (
+  event: Slack.BlockAction,
+  client: Slack.webApi.WebClient
+) => void
 export abstract class Root {
   children?: Rendered
   getChildren(): Rendered {

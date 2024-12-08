@@ -1,12 +1,12 @@
 import { Temporal } from 'temporal-polyfill'
 
-import type { Instance, TextInstance } from './renderer.ts'
+import type { Instance, TextInstance } from '../renderer.ts'
 import type { types as Slack } from '@slack/bolt'
 import {
   assertNoChildren,
   dateToSlackTimestamp,
   getTextChild,
-} from './helpers.ts'
+} from '../helpers.ts'
 
 function assertElementsAllowedInCodeBlock(
   elements: Slack.RichTextElement[]

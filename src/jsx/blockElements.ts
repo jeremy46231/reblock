@@ -1,5 +1,5 @@
 import type { types as Slack } from '@slack/bolt'
-import type { Instance, TextInstance } from './renderer.ts'
+import type { Instance, TextInstance } from '../renderer.ts'
 import {
   assertNoChildren,
   dateToSlackTimestamp,
@@ -7,7 +7,7 @@ import {
   getTextProperty,
   jsxToImageObject,
   plainDateToString,
-} from './helpers.ts'
+} from '../helpers.ts'
 import { Temporal } from 'temporal-polyfill'
 
 export type BlockElement =
@@ -363,7 +363,9 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
 
   if (jsx.element === 'img') {
     if (jsx.props.title) {
-      throw new Error('Title not allowed on image element, only image blocks allow titles')
+      throw new Error(
+        'Title not allowed on image element, only image blocks allow titles'
+      )
     }
     return jsxToImageObject(jsx) satisfies Slack.ImageElement
   }

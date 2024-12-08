@@ -1,7 +1,6 @@
 import type { Temporal } from 'temporal-polyfill'
 import type React from 'react'
 import type Slack from '@slack/bolt'
-import type { types as SlackTypes, webApi as SlackAPITypes } from '@slack/bolt'
 
 type NoChildren = { children?: never }
 type AllowsChildren = { children?: React.ReactNode }
@@ -11,8 +10,8 @@ declare global {
   namespace JSX {
     interface IntrinsicElements {
       messagetext: AllowsChildren
-      
-      // SlackTypes Blocks
+
+      // Slack.types Blocks
       rich: AllowsChildren
       hr: AllowsChildren
       h1: AllowsChildren
@@ -45,17 +44,20 @@ declare global {
       mrkdwn: AllowsChildren
       button: (
         | {
-            workflow: SlackTypes.WorkflowButton['workflow']
+            workflow: Slack.types.WorkflowButton['workflow']
           }
         | {
             url?: string
-            onEvent?: (event: Slack.BlockButtonAction, client: SlackAPITypes.WebClient) => void
+            onEvent?: (
+              event: Slack.BlockButtonAction,
+              client: Slack.webApi.WebClient
+            ) => void
           }
       ) & {
         primary?: boolean
         danger?: boolean
         alt?: string
-        confirm?: SlackTypes.ConfirmationDialog 
+        confirm?: Slack.types.ConfirmationDialog
       } & AllowsChildren
       text: {
         initial?: string
@@ -66,48 +68,66 @@ declare global {
         focus?: boolean
         label?: string
         hint?: string
-        onEvent?: (event: Slack.BlockPlainTextInputAction, client: SlackAPITypes.WebClient) => void
+        onEvent?: (
+          event: Slack.BlockPlainTextInputAction,
+          client: Slack.webApi.WebClient
+        ) => void
       } & AllowsChildren
       textarea: {
         placeholder?: string
         focus?: boolean
         label?: string
         hint?: string
-        onEvent?: (event: Slack.BlockAction<Slack.RichTextInputAction>, client: SlackAPITypes.WebClient) => void
+        onEvent?: (
+          event: Slack.BlockAction<Slack.RichTextInputAction>,
+          client: Slack.webApi.WebClient
+        ) => void
       } & AllowsChildren
       datepicker: {
         initial?: string | Temporal.PlainDate | Date
-        confirm?: SlackTypes.ConfirmationDialog
+        confirm?: Slack.types.ConfirmationDialog
         placeholder?: string
         focus?: boolean
         label?: string
         hint?: string
-        onEvent?: (event: Slack.BlockDatepickerAction, client: SlackAPITypes.WebClient) => void
+        onEvent?: (
+          event: Slack.BlockDatepickerAction,
+          client: Slack.webApi.WebClient
+        ) => void
       } & NoChildren
       datetimepicker: {
         initial?: string | Temporal.Instant | Date
-        confirm?: SlackTypes.ConfirmationDialog
+        confirm?: Slack.types.ConfirmationDialog
         focus?: boolean
         label?: string
         hint?: string
-        onEvent?: (event: Slack.BlockAction, client: SlackAPITypes.WebClient) => void // TODO: why doesn't DatetimepickerAction exist?
+        onEvent?: (
+          event: Slack.BlockAction,
+          client: Slack.webApi.WebClient
+        ) => void // TODO: why doesn't DatetimepickerAction exist?
       } & NoChildren
       timepicker: {
         initial?: string | Temporal.PlainTime
         timezone?: string | Temporal.TimeZone
-        confirm?: SlackTypes.ConfirmationDialog
+        confirm?: Slack.types.ConfirmationDialog
         placeholder?: string
         focus?: boolean
         label?: string
         hint?: string
-        onEvent?: (event: Slack.BlockTimepickerAction, client: SlackAPITypes.WebClient) => void
+        onEvent?: (
+          event: Slack.BlockTimepickerAction,
+          client: Slack.webApi.WebClient
+        ) => void
       } & NoChildren
       email: {
         initial?: string
         placeholder?: string
         label?: string
         hint?: string
-        onEvent?: (event: Slack.BlockAction, client: SlackAPITypes.WebClient) => void // TODO
+        onEvent?: (
+          event: Slack.BlockAction,
+          client: Slack.webApi.WebClient
+        ) => void // TODO
       } & NoChildren
       url: {
         initial?: string
@@ -115,7 +135,10 @@ declare global {
         focus?: boolean
         label?: string
         hint?: string
-        onEvent?: (event: Slack.BlockAction, client: SlackAPITypes.WebClient) => void // TODO
+        onEvent?: (
+          event: Slack.BlockAction,
+          client: Slack.webApi.WebClient
+        ) => void // TODO
       } & NoChildren
       number: {
         decimal?: boolean
@@ -126,31 +149,43 @@ declare global {
         focus?: boolean
         label?: string
         hint?: string
-        onEvent?: (event: Slack.BlockAction, client: SlackAPITypes.WebClient) => void // TODO
+        onEvent?: (
+          event: Slack.BlockAction,
+          client: Slack.webApi.WebClient
+        ) => void // TODO
       } & NoChildren
       file: {
         filetypes?: string[]
         maxFiles?: number
         label?: string
         hint?: string
-        onEvent?: (event: Slack.BlockAction, client: SlackAPITypes.WebClient) => void // TODO
+        onEvent?: (
+          event: Slack.BlockAction,
+          client: Slack.webApi.WebClient
+        ) => void // TODO
       } & NoChildren
       checkboxes: {
-        confirm?: SlackTypes.ConfirmationDialog
+        confirm?: Slack.types.ConfirmationDialog
         focus?: boolean
         label?: string
         hint?: string
-        onEvent?: (event: Slack.BlockCheckboxesAction, client: SlackAPITypes.WebClient) => void
+        onEvent?: (
+          event: Slack.BlockCheckboxesAction,
+          client: Slack.webApi.WebClient
+        ) => void
       } & AllowsChildren
       checkbox: {
         mrkdwn?: boolean
       } & AllowsChildren
       radio: {
-        confirm?: SlackTypes.ConfirmationDialog
+        confirm?: Slack.types.ConfirmationDialog
         focus?: boolean
         label?: string
         hint?: string
-        onEvent?: (event: Slack.BlockRadioButtonsAction, client: SlackAPITypes.WebClient) => void
+        onEvent?: (
+          event: Slack.BlockRadioButtonsAction,
+          client: Slack.webApi.WebClient
+        ) => void
       } & AllowsChildren
       option: {
         mrkdwn?: boolean
@@ -159,15 +194,21 @@ declare global {
         | {
             multi: true
             max?: number
-            onEvent?: (event: Slack.BlockAction<Slack.MultiStaticSelectAction>, client: SlackAPITypes.WebClient) => void
+            onEvent?: (
+              event: Slack.BlockAction<Slack.MultiStaticSelectAction>,
+              client: Slack.webApi.WebClient
+            ) => void
           }
         | {
             multi?: false
-            onEvent?: (event: Slack.BlockStaticSelectAction, client: SlackAPITypes.WebClient) => void
+            onEvent?: (
+              event: Slack.BlockStaticSelectAction,
+              client: Slack.webApi.WebClient
+            ) => void
           }
       ) & {
         placeholder?: string
-        confirm?: SlackTypes.ConfirmationDialog
+        confirm?: Slack.types.ConfirmationDialog
         focus?: boolean
         label?: string
         hint?: string
@@ -176,15 +217,21 @@ declare global {
         | {
             multi: true
             initial?: string[]
-            onEvent?: (event: Slack.BlockAction<Slack.MultiUsersSelectAction>, client: SlackAPITypes.WebClient) => void
+            onEvent?: (
+              event: Slack.BlockAction<Slack.MultiUsersSelectAction>,
+              client: Slack.webApi.WebClient
+            ) => void
           }
         | {
             multi?: false
             initial?: string
-            onEvent?: (event: Slack.BlockUsersSelectAction, client: SlackAPITypes.WebClient) => void
+            onEvent?: (
+              event: Slack.BlockUsersSelectAction,
+              client: Slack.webApi.WebClient
+            ) => void
           }
       ) & {
-        confirm?: SlackTypes.ConfirmationDialog
+        confirm?: Slack.types.ConfirmationDialog
         placeholder?: string
         focus?: boolean
         label?: string
@@ -194,18 +241,24 @@ declare global {
         | {
             multi: true
             initial?: string[]
-            onEvent?: (event: Slack.BlockAction<Slack.MultiConversationsSelectAction>, client: SlackAPITypes.WebClient) => void
+            onEvent?: (
+              event: Slack.BlockAction<Slack.MultiConversationsSelectAction>,
+              client: Slack.webApi.WebClient
+            ) => void
           }
         | {
             multi?: false
             initial?: string
-            onEvent?: (event: Slack.BlockConversationsSelectAction, client: SlackAPITypes.WebClient) => void
+            onEvent?: (
+              event: Slack.BlockConversationsSelectAction,
+              client: Slack.webApi.WebClient
+            ) => void
           }
       ) & {
         initial?: string
         defaultToCurrent?: boolean
-        filter?: SlackTypes.ConversationFilter
-        confirm?: SlackTypes.ConfirmationDialog
+        filter?: Slack.types.ConversationFilter
+        confirm?: Slack.types.ConfirmationDialog
         placeholder?: string
         focus?: boolean
         label?: string
@@ -215,24 +268,33 @@ declare global {
         | {
             multi: true
             initial?: string[]
-            onEvent?: (event: Slack.BlockAction<Slack.MultiConversationsSelectAction>, client: SlackAPITypes.WebClient) => void
+            onEvent?: (
+              event: Slack.BlockAction<Slack.MultiConversationsSelectAction>,
+              client: Slack.webApi.WebClient
+            ) => void
           }
         | {
             multi?: false
             initial?: string
-            onEvent?: (event: Slack.BlockConversationsSelectAction, client: SlackAPITypes.WebClient) => void
+            onEvent?: (
+              event: Slack.BlockConversationsSelectAction,
+              client: Slack.webApi.WebClient
+            ) => void
           }
       ) & {
         initial?: string
-        confirm?: SlackTypes.ConfirmationDialog
+        confirm?: Slack.types.ConfirmationDialog
         placeholder?: string
         focus?: boolean
         label?: string
         hint?: string
       } & NoChildren
       overflow: {
-        confirm?: SlackTypes.ConfirmationDialog
-        onEvent?: (event: Slack.BlockOverflowAction, client: SlackAPITypes.WebClient) => void
+        confirm?: Slack.types.ConfirmationDialog
+        onEvent?: (
+          event: Slack.BlockOverflowAction,
+          client: Slack.webApi.WebClient
+        ) => void
       } & AllowsChildren
 
       // Rich Text Parts

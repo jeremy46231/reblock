@@ -1,6 +1,6 @@
 import Slack from '@slack/bolt'
 import type { Root } from './renderer.ts'
-import type { ModalRoot } from './main.ts'
+import type { ModalRoot } from './surfaces/modal.ts'
 
 export const activeRoots = new Set<Root>()
 /** key: view ID */
@@ -28,17 +28,23 @@ export function registerEvents(app: Slack.App) {
     }
     console.error('No handler found for action ID')
   })
-  
-  app.view({ callback_id: 'reblock', type: 'view_submission'}, async ({ ack, body, view }) => {
-    const root = activeModals.get(view.id)
-    if (!root) return
-    ack()
-    await root.submit(body as Slack.ViewSubmitAction)
-  })
-  app.view({ callback_id: 'reblock', type: 'view_closed'}, async ({ ack, body, view }) => {
-    const root = activeModals.get(view.id)
-    if (!root) return
-    ack()
-    await root.close(body as Slack.ViewClosedAction)
-  })
+
+  app.view(
+    { callback_id: 'reblock', type: 'view_submission' },
+    async ({ ack, body, view }) => {
+      const root = activeModals.get(view.id)
+      if (!root) return
+      ack()
+      await root.submit(body as Slack.ViewSubmitAction)
+    }
+  )
+  app.view(
+    { callback_id: 'reblock', type: 'view_closed' },
+    async ({ ack, body, view }) => {
+      const root = activeModals.get(view.id)
+      if (!root) return
+      ack()
+      await root.close(body as Slack.ViewClosedAction)
+    }
+  )
 }

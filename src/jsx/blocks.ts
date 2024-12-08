@@ -4,8 +4,8 @@ import {
   getTextChild,
   getTextProperty,
   jsxToImageObject,
-} from './helpers.ts'
-import type { Rendered } from './renderer.ts'
+} from '../helpers.ts'
+import type { Rendered } from '../renderer.ts'
 import type { types as Slack } from '@slack/bolt'
 import {
   type BlockElement,
@@ -17,7 +17,9 @@ import {
   jsxToBlockElement,
 } from './blockElements.ts'
 
-export function jsxToBlocks(jsx: Rendered): [blocks: Slack.KnownBlock[], text: string] {
+export function jsxToBlocks(
+  jsx: Rendered
+): [blocks: Slack.KnownBlock[], text: string] {
   let text = ''
   const blocks = jsx.flatMap<Slack.KnownBlock>((child) => {
     if (child.type === 'text') {
