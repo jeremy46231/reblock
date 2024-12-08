@@ -1,6 +1,6 @@
 import { createContainer, render, Root } from '../renderer.ts'
 import { jsxToBlocks } from '../jsx/blocks.ts'
-import { activeModals, activeRoots } from '../events.ts'
+import { activeModals, activeRoots, ensureEventRegistered } from '../events.ts'
 import { blocks } from './blocks.ts'
 
 import type React from 'react'
@@ -88,7 +88,7 @@ export class ModalRoot extends Root {
 
   handle = new ModalHandle(this)
 }
-class ModalHandle {
+export class ModalHandle {
   constructor(private root: ModalRoot) {}
 
   get viewID() {
@@ -131,7 +131,7 @@ class ModalHandle {
   }
 }
 export async function modal(
-  client: Slack.webApi.WebClient,
+  app: Slack.App,
   argsOrId: string | DistributiveOmit<Slack.webApi.ViewsOpenArguments, 'view'>,
   titleOrModalArgs:
     | string
@@ -143,7 +143,7 @@ export async function modal(
   onEvent?: (event: Slack.SlackViewAction) => void
 ): Promise<ModalHandle>
 export async function modal(
-  client: Slack.webApi.WebClient,
+  app: Slack.App,
   argsOrId: string | DistributiveOmit<Slack.webApi.ViewsOpenArguments, 'view'>,
   titleOrModalArgs:
     | string
@@ -156,7 +156,7 @@ export async function modal(
   onClose: (event: Slack.ViewClosedAction) => void
 ): Promise<ModalHandle>
 export async function modal(
-  client: Slack.webApi.WebClient,
+  app: Slack.App,
   argsOrId: string | DistributiveOmit<Slack.webApi.ViewsOpenArguments, 'view'>,
   titleOrModalArgs:
     | string
@@ -168,6 +168,8 @@ export async function modal(
   onSubmit?: (event: any) => void,
   onClose?: (event: Slack.ViewClosedAction) => void
 ) {
+  ensureEventRegistered(app)
+
   let resolve: ((viewID: string) => void) | undefined = undefined
   let reject: ((error: Error) => void) | undefined = undefined
   const promise = new Promise<string>((res, rej) => {
@@ -182,7 +184,7 @@ export async function modal(
       ? { title: { type: 'plain_text' as const, text: titleOrModalArgs } }
       : titleOrModalArgs
   const root = new ModalRoot(
-    client,
+    app.client,
     args,
     modalArgs,
     onSubmit,

@@ -1,12 +1,17 @@
 import Slack from '@slack/bolt'
 import type { Root } from './renderer.ts'
 import type { ModalRoot } from './surfaces/modal.ts'
+import { userAppHome, type AppHomeRoot } from './surfaces/appHome.ts'
+import React from 'react'
+
+const eventRegisteredApps = new Set<Slack.App>()
 
 export const activeRoots = new Set<Root>()
 /** key: view ID */
 export const activeModals = new Map<string, ModalRoot>()
+export const activeAppHomes = new Map<string, AppHomeRoot>()
 
-export function registerEvents(app: Slack.App) {
+function registerEvents(app: Slack.App) {
   app.action(/reblock_[A-Za-z0-9_-]+/, async ({ body, ack, action }) => {
     if (!('action_id' in action) || body.type !== 'block_actions') {
       throw new Error('Unexpected action type')
@@ -47,4 +52,26 @@ export function registerEvents(app: Slack.App) {
       await root.close(body as Slack.ViewClosedAction)
     }
   )
+}
+
+export function ensureEventRegistered(app: Slack.App) {
+  if (eventRegisteredApps.has(app)) {
+    return
+  }
+  eventRegisteredApps.add(app)
+  registerEvents(app)
+}
+
+export function appHome(
+  app: Slack.App,
+  handler: (userID: string) => React.ReactNode
+) {
+  ensureEventRegistered(app)
+  app.event('app_home_opened', async ({ event }) => {
+    if (event.tab !== 'home' || activeAppHomes.has(event.user)) {
+      return
+    }
+    const reactNode = handler(event.user)
+    await userAppHome(app, event.user, reactNode)
+  })
 }

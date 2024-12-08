@@ -1,11 +1,5 @@
 import { Temporal } from 'temporal-polyfill'
-import { type Instance, type TextInstance } from './renderer.ts'
-import type {
-  Middleware,
-  types as Slack,
-  SlackEventMiddlewareArgs,
-  StringIndexed,
-} from '@slack/bolt'
+import type { Instance } from './renderer.ts'
 
 // magic Omit that works with union types, thanks o1
 export type DistributiveOmit<T, K extends keyof any> = T extends any

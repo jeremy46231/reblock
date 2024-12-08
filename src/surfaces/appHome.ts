@@ -1,6 +1,10 @@
 import { createContainer, render, Root } from '../renderer.ts'
 import { jsxToBlocks } from '../jsx/blocks.ts'
-import { activeRoots } from '../events.ts'
+import {
+  activeRoots,
+  activeAppHomes,
+  ensureEventRegistered,
+} from '../events.ts'
 import { blocks } from './blocks.ts'
 
 import type React from 'react'
@@ -18,6 +22,7 @@ export class AppHomeRoot extends Root {
   async publish() {
     try {
       activeRoots.add(this)
+      activeAppHomes.set(this.userID, this)
       const children = this.getChildren()
       const [blocks] = jsxToBlocks(children)
       await this.client.views.publish({
@@ -37,8 +42,9 @@ export class AppHomeRoot extends Root {
       console.error(error)
     }
   }
+  handle = new AppHomeHandle(this)
 }
-class AppHomeHandle {
+export class AppHomeHandle {
   constructor(private root: AppHomeRoot) {}
 
   get rendering() {
@@ -47,6 +53,7 @@ class AppHomeHandle {
   async stop(behavior: 'keep' | 'clear' | React.ReactNode = 'clear') {
     this.root.stopRendering()
     activeRoots.delete(this.root)
+    activeAppHomes.delete(this.root.userID)
     if (behavior === 'keep') return
     const finalBlocks = behavior === 'clear' ? [] : blocks(behavior)
     await this.root.client.views.publish({
@@ -58,11 +65,17 @@ class AppHomeHandle {
     })
   }
 }
-export async function appHome(
-  client: Slack.webApi.WebClient,
+export async function userAppHome(
+  app: Slack.App,
   userID: string,
   element: React.ReactNode
 ) {
+  ensureEventRegistered(app)
+  const existing = activeAppHomes.get(userID)
+  if (existing) {
+    await existing.handle.stop('keep')
+  }
+
   let resolve: (() => void) | undefined = undefined
   let reject: ((error: Error) => void) | undefined = undefined
   const promise = new Promise<void>((res, rej) => {
@@ -70,11 +83,11 @@ export async function appHome(
     reject = rej
   })
 
-  const root = new AppHomeRoot(client, userID, resolve, reject)
+  const root = new AppHomeRoot(app.client, userID, resolve, reject)
   const container = createContainer(root)
 
   render(element, container)
   await promise
 
-  return new AppHomeHandle(root)
+  return root.handle
 }

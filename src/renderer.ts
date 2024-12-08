@@ -37,6 +37,7 @@ export abstract class Root {
   rendering = true
 
   timeoutID?: NodeJS.Timeout
+  lastPublishTime = 0
   objectTreeModified() {
     if (!this.rendering) {
       return
@@ -44,10 +45,16 @@ export abstract class Root {
     if (this.timeoutID) {
       clearTimeout(this.timeoutID)
     }
+    const now = Date.now()
+    const delay = Math.max(
+      50,
+      1000 - (now - this.lastPublishTime)
+    )
     this.timeoutID = setTimeout(() => {
       this.findEventHandlers()
       this.publish()
-    }, 50)
+      this.lastPublishTime = now
+    }, delay)
   }
 
   eventHandlers = new Map<string, handler>()

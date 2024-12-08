@@ -1,6 +1,6 @@
 import { createContainer, render, Root } from '../renderer.ts'
 import { jsxToBlocks } from '../jsx/blocks.ts'
-import { activeRoots } from '../events.ts'
+import { activeRoots, ensureEventRegistered } from '../events.ts'
 import { blocks } from './blocks.ts'
 
 import type React from 'react'
@@ -64,7 +64,7 @@ export class MessageRoot extends Root {
 
   handle = new MessageHandle(this)
 }
-class MessageHandle {
+export class MessageHandle {
   constructor(private root: MessageRoot) {}
 
   get ts() {
@@ -97,7 +97,7 @@ class MessageHandle {
   }
 }
 export async function message(
-  client: Slack.webApi.WebClient,
+  app: Slack.App,
   argsOrID:
     | string
     | DistributiveOmit<
@@ -106,6 +106,8 @@ export async function message(
       >,
   element: React.ReactNode
 ) {
+  ensureEventRegistered(app)
+
   let resolve: ((ts: string) => void) | undefined = undefined
   let reject: ((error: Error) => void) | undefined = undefined
   const promise = new Promise<string>((res, rej) => {
@@ -114,7 +116,7 @@ export async function message(
   })
 
   const args = typeof argsOrID === 'string' ? { channel: argsOrID } : argsOrID
-  const root = new MessageRoot(client, args, resolve, reject)
+  const root = new MessageRoot(app.client, args, resolve, reject)
   const container = createContainer(root)
 
   render(element, container)
