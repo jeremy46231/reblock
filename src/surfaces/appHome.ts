@@ -1,10 +1,6 @@
 import { createContainer, render, Root } from '../renderer'
 import { jsxToBlocks } from '../jsx/blocks'
-import {
-  activeRoots,
-  activeAppHomes,
-  ensureEventRegistered,
-} from '../events'
+import { activeRoots, activeAppHomes, ensureEventRegistered } from '../events'
 import { blocks } from './blocks'
 
 import type React from 'react'

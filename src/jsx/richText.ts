@@ -1,5 +1,3 @@
-import { Temporal } from 'temporal-polyfill'
-
 import type { Instance, TextInstance } from '../renderer'
 import type { types as Slack } from '@slack/bolt'
 import {

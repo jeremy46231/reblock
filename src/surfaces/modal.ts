@@ -165,6 +165,7 @@ export async function modal(
         'type' | 'blocks' | 'notify_on_close' | 'callback_id'
       >,
   element: React.ReactNode,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSubmit?: (event: any) => void,
   onClose?: (event: Slack.ViewClosedAction) => void
 ) {

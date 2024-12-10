@@ -114,8 +114,8 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
         style: jsx.props.primary
           ? 'primary'
           : jsx.props.danger
-          ? 'danger'
-          : undefined,
+            ? 'danger'
+            : undefined,
         accessibility_label: getTextProperty(jsx.props.alt),
         confirm,
       } satisfies Slack.WorkflowButton
@@ -130,8 +130,8 @@ export function jsxToBlockElement(jsx: Instance | TextInstance): BlockElement {
       style: jsx.props.primary
         ? 'primary'
         : jsx.props.danger
-        ? 'danger'
-        : undefined,
+          ? 'danger'
+          : undefined,
       accessibility_label: getTextProperty(jsx.props.alt),
       confirm,
       action_id,

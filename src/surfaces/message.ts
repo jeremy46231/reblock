@@ -120,7 +120,7 @@ export async function message(
   const container = createContainer(root)
 
   render(element, container)
-  const ts = await promise
+  await promise
 
   return root.handle
 }

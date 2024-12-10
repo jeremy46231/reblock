@@ -1,8 +1,8 @@
 import { nanoid } from 'nanoid'
-import * as React from 'react'
 import Reconciler from 'react-reconciler'
 import { DefaultEventPriority } from 'react-reconciler/constants'
 import type * as Slack from '@slack/bolt'
+import type { ReactNode } from 'react'
 
 type handler = (
   event: Slack.BlockAction,
@@ -179,8 +179,7 @@ const makeHostConfig = (root: Root) =>
       mayResourceSuspendCommit() {
         throw new Error('Unsupported')
       },
-      waitForCommitToBeReady: () => null
-      
+      waitForCommitToBeReady: () => null,
     },
     cloneInstance: (
       instance,
@@ -189,8 +188,7 @@ const makeHostConfig = (root: Root) =>
       oldProps,
       newProps,
       internalInstanceHandle,
-      keepChildren,
-      recyclableInstance
+      keepChildren
     ) => {
       return {
         type: 'instance',
@@ -212,6 +210,7 @@ const makeHostConfig = (root: Root) =>
       throw new Error('Unsupported')
     },
     detachDeletedInstance: () => {},
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     createContainerChildSet: (_container: Root) => {
       return [] as (Instance | TextInstance)[]
     },
@@ -331,11 +330,11 @@ export function createContainer(root: Root) {
   return { container, reconciler }
 }
 export function render(
-  element: React.ReactNode,
+  element: ReactNode,
   reactInstance: { container: unknown; reconciler: reconciler }
 ) {
   reactInstance.reconciler.updateContainer(
-    element as any,
+    element,
     reactInstance.container,
     null
   )

@@ -1,3 +1,4 @@
+/** @jsxImportSource reblock-js */
 import Reblock from 'reblock-js'
 import { useState, useEffect } from 'react'
 import * as Slack from '@slack/bolt'

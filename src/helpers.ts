@@ -2,6 +2,7 @@ import { Temporal } from 'temporal-polyfill'
 import type { Instance } from './renderer'
 
 // magic Omit that works with union types, thanks o1
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type DistributiveOmit<T, K extends keyof any> = T extends any
   ? Omit<T, K>
   : never
@@ -88,8 +89,8 @@ export function jsxToImageObject(jsx: Instance) {
   const source = !sourceString.startsWith('http')
     ? { slack_file: { id: sourceString } }
     : sourceString.startsWith('https://files.slack.com')
-    ? { slack_file: { url: sourceString } }
-    : { image_url: sourceString }
+      ? { slack_file: { url: sourceString } }
+      : { image_url: sourceString }
   return {
     type: 'image' as const,
     ...source,

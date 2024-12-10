@@ -2,7 +2,7 @@ import Slack from '@slack/bolt'
 import type { Root } from './renderer'
 import type { ModalRoot } from './surfaces/modal'
 import { userAppHome, type AppHomeRoot } from './surfaces/appHome'
-import React from 'react'
+import type { ReactNode } from 'react'
 
 const eventRegisteredApps = new Set<Slack.App>()
 
@@ -64,7 +64,7 @@ export function ensureEventRegistered(app: Slack.App) {
 
 export function appHome(
   app: Slack.App,
-  handler: (userID: string) => React.ReactNode
+  handler: (userID: string) => ReactNode
 ) {
   ensureEventRegistered(app)
   app.event('app_home_opened', async ({ event }) => {

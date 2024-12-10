@@ -1,9 +1,37 @@
 {
   "name": "reblock-js",
-  "version": "0.0.2",
-  "scripts": {
-    "build": "rm -r dist || true && tsc"
+  "version": "0.0.4",
+  "description": "Build interactive Slack surfaces with React",
+  "author": {
+    "name": "Jeremy Woolley",
+    "email": "reblock-npm@jeremywoolley.com",
+    "url": "https://jeremywoolley.com"
   },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jeremy46231/reblock"
+  },
+  "homepage": "https://github.com/jeremy46231/reblock",
+  "bugs": {
+    "url": "https://github.com/jeremy46231/reblock/issues",
+    "email": "reblock-bugs@jeremywoolley.com"
+  },
+  "keywords": [
+    "slack",
+    "react",
+    "bolt",
+    "jsx",
+    "block-kit"
+  ],
+  "scripts": {
+    "lint": "eslint src",
+    "fmt": "prettier -lw .",
+    "check": "bun run fmt && bun run lint && tsc --noEmit",
+    "build": "rm -r dist node_modules || true && bun install --silent && bun run fmt && bun run lint && tsc && prettier -lw --ignore-path '' dist > /dev/null",
+    "publish": "bun run build && bun publish --access public"
+  },
+  "type": "module",
   "main": "dist/main.js",
   "types": "dist/main.d.ts",
   "exports": {
@@ -31,6 +59,10 @@
     "temporal-polyfill": "^0.2.5"
   },
   "devDependencies": {
-    "typescript": "^5.7.2"
+    "@eslint/js": "^9.16.0",
+    "eslint": "^9.16.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.0"
   }
 }

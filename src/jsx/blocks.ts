@@ -9,7 +9,6 @@ import type { Rendered } from '../renderer'
 import type { types as Slack } from '@slack/bolt'
 import {
   actionsBlockElementTagNames,
-  type BlockElement,
   blockElementIsActionsBlockElement,
   blockElementIsContextBlockElement,
   blockElementIsInputBlockElement,
@@ -82,7 +81,7 @@ export function jsxToBlocks(
     if (child.element === 'section') {
       const block: Slack.SectionBlock = {
         type: 'section',
-        // @ts-ignore This feature isn't in the type definitions yet
+        // @ts-expect-error This feature isn't in the type definitions yet
         expand: !!child.props.expand,
       }
       for (const el of child.children) {
