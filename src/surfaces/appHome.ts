@@ -1,11 +1,11 @@
-import { createContainer, render, Root } from '../renderer.ts'
-import { jsxToBlocks } from '../jsx/blocks.ts'
+import { createContainer, render, Root } from '../renderer'
+import { jsxToBlocks } from '../jsx/blocks'
 import {
   activeRoots,
   activeAppHomes,
   ensureEventRegistered,
-} from '../events.ts'
-import { blocks } from './blocks.ts'
+} from '../events'
+import { blocks } from './blocks'
 
 import type React from 'react'
 import type Slack from '@slack/bolt'
@@ -15,7 +15,7 @@ export class AppHomeRoot extends Root {
     public client: Slack.webApi.WebClient,
     public userID: string,
     private resolve?: () => void,
-    private reject?: (error: Error) => void
+    private reject?: (error: unknown) => void
   ) {
     super()
   }
@@ -77,7 +77,7 @@ export async function userAppHome(
   }
 
   let resolve: (() => void) | undefined = undefined
-  let reject: ((error: Error) => void) | undefined = undefined
+  let reject: ((error: unknown) => void) | undefined = undefined
   const promise = new Promise<void>((res, rej) => {
     resolve = res
     reject = rej

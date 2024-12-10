@@ -1,12 +1,12 @@
 import { Temporal } from 'temporal-polyfill'
 
-import type { Instance, TextInstance } from '../renderer.ts'
+import type { Instance, TextInstance } from '../renderer'
 import type { types as Slack } from '@slack/bolt'
 import {
   assertNoChildren,
   dateToSlackTimestamp,
   getTextChild,
-} from '../helpers.ts'
+} from '../helpers'
 
 export const richTextElementTagNames = [
   'rich',
@@ -66,7 +66,9 @@ export function jsxToRichTextBlock(
     }
   }
 
-  throw new Error(`(should be impossible) Unsupported element type: ${jsx.element}`)
+  throw new Error(
+    `(should be impossible) Unsupported element type: ${jsx.element}`
+  )
 }
 
 function assertElementsAllowedInCodeBlock(

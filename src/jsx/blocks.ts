@@ -1,11 +1,11 @@
-import { jsxToRichTextBlock, richTextElementTagNames } from './richText.ts'
+import { jsxToRichTextBlock, richTextElementTagNames } from './richText'
 import {
   assertNoChildren,
   getTextChild,
   getTextProperty,
   jsxToImageObject,
-} from '../helpers.ts'
-import type { Rendered } from '../renderer.ts'
+} from '../helpers'
+import type { Rendered } from '../renderer'
 import type { types as Slack } from '@slack/bolt'
 import {
   actionsBlockElementTagNames,
@@ -16,7 +16,7 @@ import {
   blockElementIsSectionAccessory,
   inputBlockElementTagNames,
   jsxToBlockElement,
-} from './blockElements.ts'
+} from './blockElements'
 
 export function jsxToBlocks(
   jsx: Rendered
@@ -24,7 +24,9 @@ export function jsxToBlocks(
   let text = ''
   const blocks = jsx.flatMap<Slack.KnownBlock>((child) => {
     if (child.type === 'text') {
-      throw new Error('Text nodes are not allowed at the root, put them in a <section> or <rich> element')
+      throw new Error(
+        'Text nodes are not allowed at the root, put them in a <section> or <rich> element'
+      )
     }
     if (child.element === 'messagetext') {
       text = getTextChild(child)
@@ -181,7 +183,7 @@ export function jsxToBlocks(
         ] satisfies [Slack.ActionsBlock]
       }
     }
-    
+
     throw new Error(`Unsupported element type: ${child.type} ${child.element}`)
   })
   return [blocks, text]

@@ -1,5 +1,5 @@
 import type { types as Slack } from '@slack/bolt'
-import type { Instance, TextInstance } from '../renderer.ts'
+import type { Instance, TextInstance } from '../renderer'
 import {
   assertNoChildren,
   dateToSlackTimestamp,
@@ -7,7 +7,7 @@ import {
   getTextProperty,
   jsxToImageObject,
   plainDateToString,
-} from '../helpers.ts'
+} from '../helpers'
 import { Temporal } from 'temporal-polyfill'
 
 export type BlockElement =

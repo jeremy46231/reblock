@@ -1,8 +1,8 @@
 import { nanoid } from 'nanoid'
-import React from 'react'
+import * as React from 'react'
 import Reconciler from 'react-reconciler'
 import { DefaultEventPriority } from 'react-reconciler/constants'
-import type Slack from '@slack/bolt'
+import type * as Slack from '@slack/bolt'
 
 type handler = (
   event: Slack.BlockAction,
@@ -36,7 +36,7 @@ export abstract class Root {
   abstract publish(): void
   rendering = true
 
-  timeoutID?: NodeJS.Timeout
+  timeoutID?: ReturnType<typeof setTimeout>
   lastPublishTime = 0
   objectTreeModified() {
     if (!this.rendering) {
@@ -46,10 +46,7 @@ export abstract class Root {
       clearTimeout(this.timeoutID)
     }
     const now = Date.now()
-    const delay = Math.max(
-      50,
-      1000 - (now - this.lastPublishTime)
-    )
+    const delay = Math.max(50, 1000 - (now - this.lastPublishTime))
     this.timeoutID = setTimeout(() => {
       this.findEventHandlers()
       this.publish()
@@ -113,9 +110,9 @@ const makeHostConfig = (root: Root) =>
     supportsPersistence: true,
     supportsMutation: true,
     supportsHydration: false,
-    getRootHostContext: () => null,
-    getChildHostContext: () => null,
-    createInstance: (type: string, props: Props): Instance => {
+    getRootHostContext: () => undefined,
+    getChildHostContext: () => undefined,
+    createInstance(type: string, props: Props): Instance {
       return {
         type: 'instance',
         id: nanoid(),
@@ -126,11 +123,11 @@ const makeHostConfig = (root: Root) =>
         props: props,
       }
     },
-    appendInitialChild: (parent: Instance, child: Instance | TextInstance) => {
+    appendInitialChild(parent: Instance, child: Instance | TextInstance) {
       parent.children.push(child)
       root.objectTreeModified()
     },
-    createTextInstance: (text): TextInstance => {
+    createTextInstance(text): TextInstance {
       return {
         type: 'text',
         id: nanoid(),
@@ -138,14 +135,14 @@ const makeHostConfig = (root: Root) =>
         text,
       }
     },
-    finalizeInitialChildren: () => {
+    finalizeInitialChildren() {
       root.objectTreeModified()
       return false
     },
     shouldSetTextContent: () => false,
     getPublicInstance: (instance) => instance,
     prepareForCommit: () => null,
-    resetAfterCommit: () => null,
+    resetAfterCommit: () => {},
     preparePortalMount: () => null,
     scheduleTimeout: setTimeout,
     cancelTimeout: clearTimeout,
@@ -153,6 +150,37 @@ const makeHostConfig = (root: Root) =>
     isPrimaryRenderer: true,
     getCurrentEventPriority() {
       return DefaultEventPriority
+    },
+
+    ...{
+      // FOR FUTURE ME: woah, bizarre errors????
+      // bc I updated react-reconciler, remember the types are very out of date
+      // and you need to manually add the new methods
+      // to see examples, I think https://github.com/facebook/react/blob/main/packages/react-reconciler/src/__tests__/ReactFiberHostContext-test.internal.js#L41
+      // has them, maybe the good test was somewhere else tho
+      // good luck
+      trackSchedulerEvent: () => {},
+      resolveEventType: () => null,
+      resolveEventTimeStamp: () => -1.1,
+      shouldAttemptEagerTransition: () => false,
+      now: Date.now,
+      logRecoverableError: console.error,
+
+      resolveUpdatePriority() {
+        return DefaultEventPriority
+      },
+      getCurrentUpdatePriority() {
+        return DefaultEventPriority
+      },
+      setCurrentUpdatePriority() {},
+      maySuspendCommit() {
+        return false
+      },
+      mayResourceSuspendCommit() {
+        throw new Error('Unsupported')
+      },
+      waitForCommitToBeReady: () => null
+      
     },
     cloneInstance: (
       instance,
@@ -249,7 +277,7 @@ const makeHostConfig = (root: Root) =>
       textInstance.text = nextText
       root.objectTreeModified()
     },
-    commitMount(instance, type, props, internalHandle) {},
+    commitMount() {},
     prepareUpdate: () => {
       return {}
     },
@@ -307,7 +335,7 @@ export function render(
   reactInstance: { container: unknown; reconciler: reconciler }
 ) {
   reactInstance.reconciler.updateContainer(
-    element,
+    element as any,
     reactInstance.container,
     null
   )

@@ -1,5 +1,5 @@
 import { Temporal } from 'temporal-polyfill'
-import type { Instance } from './renderer.ts'
+import type { Instance } from './renderer'
 
 // magic Omit that works with union types, thanks o1
 export type DistributiveOmit<T, K extends keyof any> = T extends any

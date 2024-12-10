@@ -1,5 +1,5 @@
-import { createContainer, render, Root } from '../renderer.ts'
-import { jsxToBlocks } from '../jsx/blocks.ts'
+import { createContainer, render, Root } from '../renderer'
+import { jsxToBlocks } from '../jsx/blocks'
 
 import type React from 'react'
 import type Slack from '@slack/bolt'

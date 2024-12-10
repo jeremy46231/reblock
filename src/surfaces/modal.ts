@@ -1,11 +1,11 @@
-import { createContainer, render, Root } from '../renderer.ts'
-import { jsxToBlocks } from '../jsx/blocks.ts'
-import { activeModals, activeRoots, ensureEventRegistered } from '../events.ts'
-import { blocks } from './blocks.ts'
+import { createContainer, render, Root } from '../renderer'
+import { jsxToBlocks } from '../jsx/blocks'
+import { activeModals, activeRoots, ensureEventRegistered } from '../events'
+import { blocks } from './blocks'
 
 import type React from 'react'
 import type Slack from '@slack/bolt'
-import { DistributiveOmit } from '../helpers.ts'
+import type { DistributiveOmit } from '../helpers'
 
 export class ModalRoot extends Root {
   viewID?: Promise<string>
@@ -23,7 +23,7 @@ export class ModalRoot extends Root {
     private onSubmit?: (event: Slack.ViewSubmitAction) => void,
     private onClose?: (event: Slack.ViewClosedAction) => void,
     private resolve?: (viewID: string) => void,
-    private reject?: (error: Error) => void
+    private reject?: (error: unknown) => void
   ) {
     super()
   }
@@ -171,7 +171,7 @@ export async function modal(
   ensureEventRegistered(app)
 
   let resolve: ((viewID: string) => void) | undefined = undefined
-  let reject: ((error: Error) => void) | undefined = undefined
+  let reject: ((error: unknown) => void) | undefined = undefined
   const promise = new Promise<string>((res, rej) => {
     resolve = res
     reject = rej

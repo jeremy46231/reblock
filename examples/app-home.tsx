@@ -1,10 +1,10 @@
-import React from 'react'
-import Slack from '@slack/bolt'
-import Reblock from './main.ts'
+import Reblock from 'reblock-js'
+import { useState, useEffect } from 'react'
+import * as Slack from '@slack/bolt'
 
 function Counter() {
-  const [count, setCount] = React.useState(0)
-  React.useEffect(() => {
+  const [count, setCount] = useState(0)
+  useEffect(() => {
     const interval = setInterval(() => {
       setCount((count) => count + 1)
     }, 2000)
@@ -14,7 +14,7 @@ function Counter() {
 }
 
 function Increment() {
-  const [count, setCount] = React.useState(0)
+  const [count, setCount] = useState(0)
   return (
     <>
       <rich>

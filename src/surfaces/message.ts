@@ -1,11 +1,11 @@
-import { createContainer, render, Root } from '../renderer.ts'
-import { jsxToBlocks } from '../jsx/blocks.ts'
-import { activeRoots, ensureEventRegistered } from '../events.ts'
-import { blocks } from './blocks.ts'
+import { createContainer, render, Root } from '../renderer'
+import { jsxToBlocks } from '../jsx/blocks'
+import { activeRoots, ensureEventRegistered } from '../events'
+import { blocks } from './blocks'
 
 import type React from 'react'
 import type Slack from '@slack/bolt'
-import { DistributiveOmit } from '../helpers.ts'
+import type { DistributiveOmit } from '../helpers'
 
 export class MessageRoot extends Root {
   ts?: Promise<string>
@@ -17,7 +17,7 @@ export class MessageRoot extends Root {
       'blocks' | 'text'
     >,
     private resolve?: (ts: string) => void,
-    private reject?: (error: Error) => void
+    private reject?: (error: unknown) => void
   ) {
     super()
   }
@@ -109,7 +109,7 @@ export async function message(
   ensureEventRegistered(app)
 
   let resolve: ((ts: string) => void) | undefined = undefined
-  let reject: ((error: Error) => void) | undefined = undefined
+  let reject: ((error: unknown) => void) | undefined = undefined
   const promise = new Promise<string>((res, rej) => {
     resolve = res
     reject = rej

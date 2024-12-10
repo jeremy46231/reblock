@@ -1,15 +1,36 @@
 {
+  "name": "reblock-js",
+  "version": "0.0.2",
+  "scripts": {
+    "build": "rm -r dist || true && tsc"
+  },
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/main.js",
+      "types": "./dist/main.d.ts"
+    },
+    "./jsx-runtime": {
+      "import": "./dist/jsx-runtime/jsx-runtime.js",
+      "types": "./dist/jsx-runtime/jsx-runtime.d.ts"
+    },
+    "./jsx-dev-runtime": {
+      "import": "./dist/jsx-runtime/jsx-dev-runtime.js",
+      "types": "./dist/jsx-runtime/jsx-dev-runtime.d.ts"
+    }
+  },
   "dependencies": {
     "@slack/bolt": "^4.1.1",
-    "@types/react": "18.3.12",
+    "@types/react": "^19.0.0",
     "@types/react-reconciler": "^0.28.8",
     "exponential-backoff": "3.1.1",
     "nanoid": "5.0.9",
-    "react": "^18.3.1",
-    "react-reconciler": "^0.29.2",
+    "react": "^19.0.0",
+    "react-reconciler": "^0.31.0",
     "temporal-polyfill": "^0.2.5"
   },
-  "patchedDependencies": {
-    "@types/react@18.3.12": "patches/@types%2Freact@18.3.12.patch"
+  "devDependencies": {
+    "typescript": "^5.7.2"
   }
 }

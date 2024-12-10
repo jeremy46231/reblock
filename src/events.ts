@@ -1,7 +1,7 @@
 import Slack from '@slack/bolt'
-import type { Root } from './renderer.ts'
-import type { ModalRoot } from './surfaces/modal.ts'
-import { userAppHome, type AppHomeRoot } from './surfaces/appHome.ts'
+import type { Root } from './renderer'
+import type { ModalRoot } from './surfaces/modal'
+import { userAppHome, type AppHomeRoot } from './surfaces/appHome'
 import React from 'react'
 
 const eventRegisteredApps = new Set<Slack.App>()
